@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>myWordBook</title>
+    <script src="js/jquery-2.1.3.min.js"></script>    
+    <link rel="stylesheet" href="css/style.css">
+    </head>
+
+<body>
+
+    <header>
+        <h1>単語帳</h1>
+    </header>
+
+    <main>
+        <input type="text" id="kanji" placeholder="単語">
+        <input type="text" id="yomi" placeholder="意味 / よみがな">
+        <button id="save_btn">保存</button>
+        <p id = "total">全0件</p>
+        <div id = "table_container">
+            <table id="table"></table>
+        </div>
+        <!-- ストレージ内を全削除 -->
+        <button id="clear_btn">全削除</button>         
+
+    </main>
+
+    <script>
+        $(document).ready(function(){
+            const table = $('#table');
+            const total = $('#total');
+            const save_btn = $('#save_btn');
+            const clear_btn = $('#clear_btn');
+            const kanji = $('#kanji');
+            const yomi = $('#yomi');
+    
+            // createTable 関数を定義
+            function createTable(){
+                table.html('<tr><th>Word</th><th>Meaning / kana</th><th>Clear</th></tr>');
+                for(let i=0; i<colors.length; i++){
+                    let tr = $('<tr></tr>');
+                    let tdKanji = $('<td></td>').text(colors[i].kanji);
+                    let tdYomi = $('<td></td>').text(colors[i].yomi);
+                    let tdDelete = $('<td></td>');
+                    let deleteButton = $('<button></button>').text('覚えた！').addClass('delete-btn');
+                    deleteButton.data('index',i); // 削除ボタンに対応するインデックスをデータ属性として設定
+                    tdDelete.append(deleteButton);
+                    tr.append(tdKanji, tdYomi, tdDelete);
+                    table.append(tr);
+                }
+                total.text(`全${colors.length}件`);
+            }     
+    
+            class Color{
+                constructor(kanji,yomi){
+                    this.kanji = kanji;
+                    this.yomi = yomi;
+                }
+            }
+    
+            let colors=[];
+        
+            const loadData = localStorage.getItem('colors');
+            if (loadData !== null) {
+                const jsonArr = JSON.parse(loadData);
+                for (let i = 0; i < jsonArr.length; i++) {
+                    let color = new Color(jsonArr[i].kanji, jsonArr[i].yomi);
+                    colors.push(color);
+                }
+                createTable(); // ページ読み込み時にテーブルを作成
+            }
+    
+            // 保存ボタンのクリックイベント
+            save_btn.on('click',function(){
+                let kanjiValue = kanji.val(); // kanji の値を取得
+                let yomiValue = yomi.val(); // yomi の値を取得
+                let color = new Color(kanjiValue, yomiValue); // 新しい Color オブジェクトを作成
+                colors.push(color);
+                kanji.val(''); // 入力欄を空にする
+                yomi.val(''); // 入力欄を空にする
+                createTable(); // テーブルを再描画
+                localStorage.setItem('colors',JSON.stringify(colors)); // ローカルストレージに保存
+            });
+    
+            // 削除ボタンのクリックイベント
+            table.on('click', '.delete-btn', function() {
+                let index = $(this).data('index'); // データ属性から削除対象のインデックスを取得
+                colors.splice(index, 1); // 配列から要素を削除
+                createTable(); // テーブルを再描画
+                localStorage.setItem('colors', JSON.stringify(colors)); // ローカルストレージに保存
+            });
+
+            clear_btn.on('click',function(){
+                localStorage.removeItem('colors'); // ローカルストレージから削除
+                alert('全削除しました');
+                kanji.val(''); // 入力欄を空にする
+            });
+        });
+        </script>
+   
+
+    <footer><small>Copyright 2024 Urayama</small></footer>
+
+
+<!-- 
+    <main style="display: none;">
+        <textarea id="text_area"></textarea>
+        <ul>
+            <li id="save">Save</li>
+            <li id="clear">Clear</li>
+        </ul>
+    </main>
+
+
+    <script>
+        // $("main").fadeIn(1000);
+        $("main").slideToggle(1000);
+        //1.Save クリックイベント
+        $("#save").on("click",function(){
+            // 値を取得して「value」の箱に入れて！の意味
+            const value = $("#text_area").val();
+            localStorage.setItem("memo",value);
+            alert("保存しました");
+        });
+
+        //2.clear クリックイベント
+        $("#clear").on("click",function(){
+            localStorage.removeItem("memo");
+            alert("削除しました");
+            $("#text_area").val("");
+        });
+
+        //3.ページ読み込み：保存データ取得表示
+        if(localStorage.getItem("memo")){
+            const value=localStorage.getItem("memo");
+            $("#text_area").val(value);
+        } -->
+
+
+    <!-- </script> -->
+</body>
+</html>
